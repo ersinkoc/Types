@@ -44,13 +44,13 @@
     "prepare": "npm run build"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "vitest": "^2.0.0",
-    "@vitest/coverage-v8": "^2.0.0",
-    "tsup": "^8.0.0",
     "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^9.0.0",
     "prettier": "^3.0.0",
-    "eslint": "^9.0.0"
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
   },
   "publishConfig": {
     "access": "public"
@@ -62,5 +62,9 @@
   "bugs": {
     "url": "https://github.com/ersinkoc/types/issues"
   },
-  "homepage": "https://types.oxog.dev"
+  "homepage": "https://types.oxog.dev",
+  "dependencies": {
+    "@types/prismjs": "^1.26.5",
+    "prismjs": "^1.30.0"
+  }
 }
