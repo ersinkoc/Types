@@ -1,0 +1,66 @@
+{
+  "name": "@oxog/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types, interfaces, and utilities for the @oxog ecosystem",
+  "author": "Ersin Koç",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "typescript",
+    "types",
+    "result",
+    "error-handling",
+    "plugin",
+    "micro-kernel",
+    "utilities",
+    "type-guards",
+    "oxog"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:run": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "tsup": "^8.0.0",
+    "@types/node": "^20.0.0",
+    "prettier": "^3.0.0",
+    "eslint": "^9.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ersinkoc/types.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ersinkoc/types/issues"
+  },
+  "homepage": "https://types.oxog.dev"
+}
