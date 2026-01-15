@@ -209,58 +209,84 @@
   }
 }
 
-/* Syntax highlighting colors for dark theme */
-.dark .token.comment,
-.dark .token.prolog,
-.dark .token.doctype,
-.dark .token.cdata {
-  color: #6a9955;
+/* @oxog/codeshine styles */
+.code-block .cs-container {
+  border-radius: 0;
+  border: none;
 }
 
-.dark .token.punctuation {
-  color: #d4d4d4;
+.code-block .cs-codeblock {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: transparent !important;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  overflow-x: auto;
 }
 
-.dark .token.property,
-.dark .token.tag,
-.dark .token.boolean,
-.dark .token.number,
-.dark .token.constant,
-.dark .token.symbol,
-.dark .token.deleted {
-  color: #b5cea8;
+.code-block .cs-code {
+  font-family: inherit;
+  background: transparent !important;
+  display: block;
 }
 
-.dark .token.selector,
-.dark .token.attr-name,
-.dark .token.string,
-.dark .token.char,
-.dark .token.builtin,
-.dark .token.inserted {
-  color: #ce9178;
+.code-block .cs-line {
+  display: flex;
+  min-height: 1.5rem;
 }
 
-.dark .token.operator,
-.dark .token.entity,
-.dark .token.url,
-.dark .language-css .token.string,
-.dark .style .token.string {
-  color: #d4d4d4;
+.code-block .cs-line-number {
+  flex-shrink: 0;
+  width: 2.5rem;
+  text-align: right;
+  padding-right: 1rem;
+  user-select: none;
+  opacity: 0.4;
 }
 
-.dark .token.atrule,
-.dark .token.attr-value,
-.dark .token.keyword {
-  color: #569cd6;
+.code-block .cs-line-content {
+  flex: 1;
+  white-space: pre;
 }
 
-.dark .token.function,
-.dark .token.class-name {
-  color: #dcdcaa;
+.code-block .cs-line-highlighted {
+  background: rgba(59, 130, 246, 0.15);
+  margin: 0 -1rem;
+  padding: 0 1rem;
 }
 
-.dark .token.regex,
-.dark .token.important,
-.dark .token.variable {
-  color: #d16969;
+.code-block .cs-line-diff-added {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.code-block .cs-line-diff-removed {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.code-block .cs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.code-block .cs-copy-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.code-block .cs-copy-button:hover {
+  color: hsl(var(--foreground));
+  background: hsl(var(--accent));
 }

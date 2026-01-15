@@ -1,11 +1,8 @@
-import { useState, useEffect } from 'react';
-import { CopyButton } from './CopyButton';
-import { Github, ChevronDown } from 'lucide-react';
-import Prism from 'prismjs';
-import 'prismjs/components/prism-typescript';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-json';
-import 'prismjs/components/prism-bash';
+import { useState, useMemo } from 'react';
+import { CodeBlock as CodeshinBlock } from '@oxog/codeshine/react';
+import { githubDark, githubLight, vscodeDark, vscodeLight, dracula, oneDark } from '@oxog/codeshine/themes';
+import { useTheme } from '@/hooks/useTheme';
+import { ChevronDown } from 'lucide-react';
 
 interface CodeBlockProps {
   code: string;
@@ -16,11 +13,16 @@ interface CodeBlockProps {
   className?: string;
 }
 
-const themes = [
-  { name: 'Github Dark', value: 'github-dark' },
-  { name: 'VS Code', value: 'vscode' },
-  { name: 'Dracula', value: 'dracula' },
-  { name: 'One Dark', value: 'one-dark' },
+const darkThemes = [
+  { name: 'Github Dark', value: 'github-dark', theme: githubDark },
+  { name: 'VS Code Dark', value: 'vscode-dark', theme: vscodeDark },
+  { name: 'Dracula', value: 'dracula', theme: dracula },
+  { name: 'One Dark', value: 'one-dark', theme: oneDark },
+];
+
+const lightThemes = [
+  { name: 'Github Light', value: 'github-light', theme: githubLight },
+  { name: 'VS Code Light', value: 'vscode-light', theme: vscodeLight },
 ];
 
 export function CodeBlock({
@@ -31,24 +33,21 @@ export function CodeBlock({
   showCopyButton = true,
   className,
 }: CodeBlockProps) {
-  const [selectedTheme, setSelectedTheme] = useState(themes[0]);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
+  // Theme options based on site theme
+  const themeOptions = useMemo(() => isDark ? darkThemes : lightThemes, [isDark]);
+
+  // Default to first theme of current mode
+  const [selectedThemeValue, setSelectedThemeValue] = useState<string | null>(null);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
-  const trimmedCode = code.trim();
-  const lines = trimmedCode.split('\n');
 
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [code, language]);
-
-  // Prism.js sanitizes output - safe to use with dangerouslySetInnerHTML
-  const highlightedLines = lines.map((line) => {
-    try {
-      const grammar = Prism.languages[language] || Prism.languages.javascript;
-      return Prism.highlight(line || ' ', grammar, language);
-    } catch {
-      return escapeHtml(line) || '&nbsp;';
-    }
-  });
+  // Get the current theme - reset to default when site theme changes
+  const selectedTheme = useMemo(() => {
+    const found = themeOptions.find(t => t.value === selectedThemeValue);
+    return found || themeOptions[0];
+  }, [themeOptions, selectedThemeValue]);
 
   return (
     <div className={`code-block relative group rounded-xl overflow-hidden border border-border/50 bg-card shadow-lg ${className || ''}`}>
@@ -80,7 +79,6 @@ export function CodeBlock({
               onClick={() => setIsThemeOpen(!isThemeOpen)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
             >
-              <Github className="w-3.5 h-3.5" />
               <span>{selectedTheme.name}</span>
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isThemeOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -88,11 +86,11 @@ export function CodeBlock({
             {/* Theme dropdown */}
             {isThemeOpen && (
               <div className="absolute right-0 top-full mt-1 w-36 rounded-lg border border-border bg-popover shadow-lg py-1 z-50">
-                {themes.map((theme) => (
+                {themeOptions.map((theme) => (
                   <button
                     key={theme.value}
                     onClick={() => {
-                      setSelectedTheme(theme);
+                      setSelectedThemeValue(theme.value);
                       setIsThemeOpen(false);
                     }}
                     className={`w-full px-3 py-1.5 text-left text-xs hover:bg-accent transition-colors ${
@@ -105,45 +103,19 @@ export function CodeBlock({
               </div>
             )}
           </div>
-
-          {/* Copy button */}
-          {showCopyButton && <CopyButton text={trimmedCode} />}
         </div>
       </div>
 
-      {/* Code content */}
-      <div className="overflow-x-auto bg-[hsl(222,47%,6%)]">
-        <pre className="p-4 m-0 font-mono text-sm leading-relaxed">
-          <code className="text-[#e6e6e6]">
-            {lines.map((_, i) => (
-              <div key={i} className="flex hover:bg-white/5 -mx-4 px-4">
-                {showLineNumbers && (
-                  <span className="text-[#6e7681] select-none mr-6 inline-block w-8 text-right text-xs leading-relaxed">
-                    {i + 1}
-                  </span>
-                )}
-                <span
-                  className="flex-1"
-                  // Prism.highlight output is safe - it escapes HTML entities
-                  dangerouslySetInnerHTML={{ __html: highlightedLines[i] || '&nbsp;' }}
-                />
-              </div>
-            ))}
-          </code>
-        </pre>
-      </div>
+      {/* Code content using @oxog/codeshine */}
+      <CodeshinBlock
+        code={code.trim()}
+        language={language}
+        theme={selectedTheme.theme}
+        lineNumbers={showLineNumbers}
+        copyButton={showCopyButton}
+        showLanguageBadge={false}
+        className="rounded-none! border-0!"
+      />
     </div>
   );
-}
-
-// HTML escape function for fallback
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  };
-  return text.replace(/[&<>"']/g, (m) => map[m] || m);
 }
