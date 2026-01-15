@@ -1,54 +1,64 @@
-import { Github, Package } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Github, Package, BookOpen, Code, Lightbulb } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
-import { GitHubStar } from '@/components/common/GitHubStar';
 import { Button } from '@/components/ui/button';
-import { PACKAGE_NAME, GITHUB_REPO, NPM_PACKAGE } from '@/lib/constants';
+import { PACKAGE_NAME, GITHUB_REPO } from '@/lib/constants';
 
 export function Header() {
+  const location = useLocation();
+
+  const navItems = [
+    { to: '/docs', label: 'Docs', icon: BookOpen },
+    { to: '/api', label: 'API', icon: Code },
+    { to: '/examples', label: 'Examples', icon: Lightbulb },
+  ];
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
-        <Link to="/" className="mr-6 flex items-center space-x-2">
-          <Package className="h-6 w-6 text-primary" />
-          <span className="font-bold">{PACKAGE_NAME}</span>
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg">
+      <div className="container flex h-16 max-w-7xl items-center mx-auto px-4">
+        {/* Logo */}
+        <Link to="/" className="mr-8 flex items-center gap-2 group">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+            <Package className="h-4 w-4 text-primary" />
+          </div>
+          <span className="font-bold text-lg">{PACKAGE_NAME}</span>
         </Link>
 
-        <nav className="flex items-center gap-6 text-sm">
-          <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
-            Home
-          </Link>
-          <Link to="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
-            Docs
-          </Link>
-          <Link to="/api" className="text-muted-foreground hover:text-foreground transition-colors">
-            API
-          </Link>
-          <Link to="/examples" className="text-muted-foreground hover:text-foreground transition-colors">
-            Examples
-          </Link>
+        {/* Navigation */}
+        <nav className="flex items-center gap-1">
+          {navItems.map(({ to, label, icon: Icon }) => {
+            const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
+            return (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'text-foreground bg-accent'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
+        {/* Right side */}
         <div className="flex flex-1 items-center justify-end gap-2">
-          <GitHubStar />
-          <a
-            href={`https://www.npmjs.com/package/${NPM_PACKAGE}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button variant="ghost" size="icon">
-              <Package className="h-5 w-5" />
-            </Button>
-          </a>
+          {/* GitHub link */}
           <a
             href={`https://github.com/${GITHUB_REPO}`}
             target="_blank"
             rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
           >
-            <Button variant="ghost" size="icon">
-              <Github className="h-5 w-5" />
-            </Button>
+            <Github className="w-4 h-4" />
+            <span>GitHub</span>
           </a>
+
+          {/* Theme toggle */}
           <ThemeToggle />
         </div>
       </div>

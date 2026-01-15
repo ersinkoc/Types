@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-01-15
+
+### Fixed
+- Removed accidental prismjs runtime dependency from package.json
+- Fixed vitest.config.ts to exclude website folder from coverage
+- Removed stale compiled vite.config.js from website
+
+### Changed
+- Added prismjs and @types/prismjs to website devDependencies (website-only)
+- Updated OXOG_VERSION constant to 1.0.1
+
+### Improved
+- Cleaner coverage report (src only: errors.ts, guards.ts, result.ts)
+- Zero runtime dependencies maintained as per spec
+
 ## [1.0.0] - 2026-01-15
 
 ### Added

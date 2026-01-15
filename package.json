@@ -1,6 +1,6 @@
 {
   "name": "@oxog/types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shared TypeScript types, interfaces, and utilities for the @oxog ecosystem",
   "author": "Ersin Koç",
   "license": "MIT",
@@ -62,9 +62,4 @@
   "bugs": {
     "url": "https://github.com/ersinkoc/types/issues"
   },
-  "homepage": "https://types.oxog.dev",
-  "dependencies": {
-    "@types/prismjs": "^1.26.5",
-    "prismjs": "^1.30.0"
-  }
-}
+  "homepage": "https://types.oxog.dev"}

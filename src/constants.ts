@@ -1,6 +1,6 @@
 /**
  * @oxog/types - Well-known symbols and constants
- * @version 1.0.0
+ * @version 1.0.1
  * @author Ersin Koç
  */
 
@@ -51,7 +51,7 @@ export const OXOG_KERNEL = Symbol.for('@oxog/kernel');
  * console.log(`Using @oxog/types v${OXOG_VERSION}`);
  * ```
  */
-export const OXOG_VERSION = '1.0.0';
+export const OXOG_VERSION = '1.0.1';
 
 /**
  * Standard error codes for @oxog ecosystem.

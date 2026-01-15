@@ -1,6 +1,6 @@
 /**
  * @oxog/types - Shared TypeScript types for the @oxog ecosystem
- * @version 1.0.0
+ * @version 1.0.1
  * @author Ersin Koç
  *
  * This is the foundational package for the @oxog ecosystem, providing

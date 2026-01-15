@@ -1,4 +1,4 @@
-@oxog/types - LLM-Native Documentation v1.0.0
+@oxog/types - LLM-Native Documentation v1.0.1
 
 PACKAGE OVERVIEW
 @oxog/types is the foundational TypeScript package for the @oxog ecosystem, providing zero-dependency type definitions for micro-kernel plugin architecture, functional error handling, and common utilities. Pure TypeScript, no runtime dependencies.
@@ -134,7 +134,7 @@ Object Utilities:
 CONSTANTS
 OXOG_PLUGIN: Symbol.for('@oxog/plugin')
 OXOG_KERNEL: Symbol.for('@oxog/kernel')
-OXOG_VERSION: '1.0.0'
+OXOG_VERSION: '1.0.1'
 
 USAGE PATTERNS
 

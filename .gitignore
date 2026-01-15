@@ -12,3 +12,6 @@ coverage
 *~
 .turbo
 build
+
+.playwright-mcp/*
+.serena/*

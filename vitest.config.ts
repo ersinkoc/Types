@@ -12,6 +12,7 @@ export default defineConfig({
         'dist/',
         'examples/',
         'tests/',
+        'website/',
         '**/*.d.ts',
         '**/*.config.*',
         'src/constants.ts',
