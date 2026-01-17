@@ -1,4 +1,4 @@
-@oxog/types - LLM-Native Documentation v1.0.1
+@oxog/types - LLM-Native Documentation v1.0.2
 
 PACKAGE OVERVIEW
 @oxog/types is the foundational TypeScript package for the @oxog ecosystem, providing zero-dependency type definitions for micro-kernel plugin architecture, functional error handling, and common utilities. Pure TypeScript, no runtime dependencies.
@@ -71,6 +71,7 @@ ValidationError: Validation-specific errors
 PluginError: Plugin-related errors
 - constructor(message: string, pluginName: string, context?: Record<string, unknown>)
 - pluginName: string (name of failing plugin)
+- context always includes { pluginName, ...additionalContext }
 - Inherits from OxogError with code: ErrorCodes.PLUGIN_ERROR
 
 ErrorCodes Enum:
@@ -100,13 +101,16 @@ TypedEventEmitter<TEvents>: Event emitter interface
 Unsubscribe: () => void (cleanup function)
 
 UTILITY TYPES
-Branded<T, B>: Create type-safe identifiers
-- type UserId = Branded<string, 'UserId'>
-- Prevents accidental type mixing at compile time
 
-DeepPartial<T>: Recursively optional
-- DeepReadonly<T>: Recursively readonly
-- DeepRequired<T>: Recursively required
+Branded Types:
+- Branded<T, B>: Create type-safe identifiers (type UserId = Branded<string, 'UserId'>)
+- Brand<T, B>: Shorthand alias for Branded
+
+Deep Utilities:
+- DeepPartial<T>: Recursively make all properties optional
+- DeepReadonly<T>: Recursively make all properties readonly
+- DeepRequired<T>: Recursively make all properties required
+- DeepMutable<T>: Recursively remove readonly from all properties
 
 MaybePromise<T>: Sync or async values
 - T | Promise<T>
@@ -130,11 +134,22 @@ Object Utilities:
 - NonEmptyArray<T>: [T, ...T[]] (array with at least one element)
 - Nullable<T>: T | null
 - Optional<T>: T | undefined
+- ValueOf<T>: Extract value types from object (T[keyof T])
+- RequireKeys<T, K>: Make specific keys required, others unchanged
+- OptionalKeys<T, K>: Make specific keys optional, others unchanged
+- KeysOfType<T, V>: Extract keys whose values are assignable to V
+- NonNullish<T>: Exclude null and undefined from T
+- Mutable<T>: Remove readonly from all properties
+
+Array Utilities:
+- Tuple<T, N>: Fixed-length tuple type ([T, T] for N=2)
+- ArrayElement<T>: Extract element type from array (T[number])
+- LiteralUnion<T, U>: Literal union with autocomplete support
 
 CONSTANTS
 OXOG_PLUGIN: Symbol.for('@oxog/plugin')
 OXOG_KERNEL: Symbol.for('@oxog/kernel')
-OXOG_VERSION: '1.0.1'
+OXOG_VERSION: '1.0.2'
 
 USAGE PATTERNS
 
@@ -174,29 +189,48 @@ Branded Types:
 type UserId = Branded<string, 'UserId'>;
 const userId: UserId = 'user_123' as UserId;
 
+New Utility Types (v1.0.2):
+// Extract value types
+const colors = { red: '#ff0000', green: '#00ff00' } as const;
+type ColorValue = ValueOf<typeof colors>; // '#ff0000' | '#00ff00'
+
+// Make specific keys required
+interface User { id?: string; name?: string; }
+type UserWithId = RequireKeys<User, 'id'>; // { id: string; name?: string }
+
+// Fixed-length tuples
+type Point2D = Tuple<number, 2>; // [number, number]
+type RGB = Tuple<number, 3>; // [number, number, number]
+
+// Extract keys by value type
+interface Config { id: number; name: string; label: string; }
+type StringKeys = KeysOfType<Config, string>; // 'name' | 'label'
+
 TECHNICAL DETAILS
 - Zero runtime dependencies
 - TypeScript strict mode
 - ES2022 target
 - ESM + CJS builds
-- 100% test coverage
+- 100% test coverage (229 tests)
 - Bundle size: < 3KB gzipped
 - Universal (Node.js + Browser)
 - Node.js >= 18
 - TypeScript >= 5.0
 
 EXPORT STRUCTURE
-All exports available from './index':
+All exports available from '@oxog/types':
 - Plugin<T>, Kernel<T>, PluginOptions, PluginLogger
 - Result<T, E>, Ok<T>, Err<E>, Ok(), Err()
 - isOk, isErr, isResult
 - OxogError, ValidationError, PluginError, ErrorCodes
 - isPlugin, isKernel, isOxogError, isValidationError, isPluginError
 - EventMap, EventHandler, TypedEventEmitter, Unsubscribe
-- Branded, Brand, DeepPartial, DeepReadonly, DeepRequired
+- Branded, Brand, DeepPartial, DeepReadonly, DeepRequired, DeepMutable
 - MaybePromise, AsyncFunction, SyncFunction, AnyFunction
 - JsonPrimitive, JsonArray, JsonObject, JsonValue
 - Prettify, StrictOmit, StrictPick, NonEmptyArray, Nullable, Optional
+- ValueOf, RequireKeys, OptionalKeys, KeysOfType, NonNullish, Mutable
+- Tuple, ArrayElement, LiteralUnion
 - OXOG_PLUGIN, OXOG_KERNEL, OXOG_VERSION
 
 LLM OPTIMIZATION
