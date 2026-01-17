@@ -132,7 +132,7 @@ export class PluginError extends OxogError {
     public readonly pluginName: string,
     context?: Record<string, unknown>
   ) {
-    super(message, ErrorCodes.PLUGIN_ERROR, context ? { pluginName, ...context } : undefined);
+    super(message, ErrorCodes.PLUGIN_ERROR, { pluginName, ...context });
     this.name = 'PluginError';
     Object.setPrototypeOf(this, new.target.prototype);
     Error.captureStackTrace(this, new.target);

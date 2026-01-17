@@ -309,3 +309,151 @@ export type Optional<T> = T | undefined;
  * ```
  */
 export type Unsubscribe = () => void;
+
+/**
+ * Extract the value types from an object type.
+ *
+ * @example
+ * ```typescript
+ * const colors = { red: '#ff0000', green: '#00ff00' } as const;
+ * type ColorValue = ValueOf<typeof colors>; // '#ff0000' | '#00ff00'
+ * ```
+ */
+export type ValueOf<T> = T[keyof T];
+
+/**
+ * Make specified keys required while keeping others optional.
+ *
+ * @example
+ * ```typescript
+ * interface User {
+ *   id?: string;
+ *   name?: string;
+ *   email?: string;
+ * }
+ *
+ * type UserWithId = RequireKeys<User, 'id'>;
+ * // { id: string; name?: string; email?: string }
+ * ```
+ */
+export type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
+/**
+ * Make specified keys optional while keeping others required.
+ *
+ * @example
+ * ```typescript
+ * interface User {
+ *   id: string;
+ *   name: string;
+ *   email: string;
+ * }
+ *
+ * type UserDraft = OptionalKeys<User, 'id'>;
+ * // { id?: string; name: string; email: string }
+ * ```
+ */
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+/**
+ * Extract keys of T that have values assignable to V.
+ *
+ * @example
+ * ```typescript
+ * interface User {
+ *   id: number;
+ *   name: string;
+ *   email: string;
+ *   age: number;
+ * }
+ *
+ * type StringKeys = KeysOfType<User, string>; // 'name' | 'email'
+ * ```
+ */
+export type KeysOfType<T, V> = {
+  [K in keyof T]: T[K] extends V ? K : never;
+}[keyof T];
+
+/**
+ * Type that excludes null and undefined from T.
+ *
+ * @example
+ * ```typescript
+ * type MaybeString = string | null | undefined;
+ * type DefinitelyString = NonNullish<MaybeString>; // string
+ * ```
+ */
+export type NonNullish<T> = Exclude<T, null | undefined>;
+
+/**
+ * Makes all properties of T mutable (removes readonly).
+ *
+ * @example
+ * ```typescript
+ * interface ReadonlyUser {
+ *   readonly id: string;
+ *   readonly name: string;
+ * }
+ *
+ * type MutableUser = Mutable<ReadonlyUser>;
+ * // { id: string; name: string }
+ * ```
+ */
+export type Mutable<T> = { -readonly [P in keyof T]: T[P] };
+
+/**
+ * Deep mutable - removes readonly from all nested properties.
+ *
+ * @example
+ * ```typescript
+ * interface ReadonlyConfig {
+ *   readonly api: {
+ *     readonly url: string;
+ *   };
+ * }
+ *
+ * type MutableConfig = DeepMutable<ReadonlyConfig>;
+ * // { api: { url: string } }
+ * ```
+ */
+export type DeepMutable<T> = T extends object
+  ? { -readonly [P in keyof T]: DeepMutable<T[P]> }
+  : T;
+
+/**
+ * Tuple type with exact length.
+ *
+ * @example
+ * ```typescript
+ * type Point2D = Tuple<number, 2>; // [number, number]
+ * type RGB = Tuple<number, 3>; // [number, number, number]
+ * ```
+ */
+export type Tuple<T, N extends number, R extends T[] = []> = R['length'] extends N
+  ? R
+  : Tuple<T, N, [T, ...R]>;
+
+/**
+ * Get the element type of an array.
+ *
+ * @example
+ * ```typescript
+ * type Numbers = number[];
+ * type Num = ArrayElement<Numbers>; // number
+ *
+ * const tuple = ['a', 1, true] as const;
+ * type TupleElement = ArrayElement<typeof tuple>; // 'a' | 1 | true
+ * ```
+ */
+export type ArrayElement<T extends readonly unknown[]> = T[number];
+
+/**
+ * Literal union type helper for better autocomplete.
+ *
+ * @example
+ * ```typescript
+ * type Color = LiteralUnion<'red' | 'green' | 'blue', string>;
+ * // Allows 'red', 'green', 'blue' with autocomplete, but accepts any string
+ * ```
+ */
+export type LiteralUnion<T extends U, U = string> = T | (U & { _brand?: never });

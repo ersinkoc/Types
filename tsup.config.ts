@@ -14,7 +14,5 @@ export default defineConfig({
   target: 'es2022',
   platform: 'neutral',
   skipNodeModulesBundle: true,
-  entryPoints: ['src/index.ts'],
   outDir: 'dist',
-  onSuccess: 'echo "Build completed successfully"',
 });

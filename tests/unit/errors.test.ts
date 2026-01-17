@@ -131,7 +131,7 @@ describe('PluginError', () => {
     expect(error.pluginName).toBe('cache-plugin');
     expect(error.code).toBe(ErrorCodes.PLUGIN_ERROR);
     expect(error.name).toBe('PluginError');
-    expect(error.context).toBeUndefined();
+    expect(error.context).toEqual({ pluginName: 'cache-plugin' });
   });
 
   it('should create error with message, plugin name, and context', () => {
