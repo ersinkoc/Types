@@ -1,6 +1,6 @@
 /**
  * @oxog/types - Type guard functions
- * @version 1.0.1
+ * @version 1.0.2
  * @author Ersin Koç
  */
 

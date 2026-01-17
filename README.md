@@ -217,6 +217,7 @@ const handler: EventHandler<AppEvents, 'user:login'> = (payload) => {
 - `DeepPartial<T>` - All properties optional
 - `DeepReadonly<T>` - All properties readonly
 - `DeepRequired<T>` - All properties required
+- `DeepMutable<T>` - All properties mutable (removes readonly)
 
 **Function:**
 - `MaybePromise<T>` - Sync or async value
@@ -237,6 +238,17 @@ const handler: EventHandler<AppEvents, 'user:login'> = (payload) => {
 - `NonEmptyArray<T>` - Array with ≥1 element
 - `Nullable<T>` - T | null
 - `Optional<T>` - T | undefined
+- `ValueOf<T>` - Extract value types from object
+- `RequireKeys<T, K>` - Make specific keys required
+- `OptionalKeys<T, K>` - Make specific keys optional
+- `KeysOfType<T, V>` - Extract keys with matching value type
+- `NonNullish<T>` - Exclude null and undefined
+- `Mutable<T>` - Remove readonly from properties
+
+**Array:**
+- `Tuple<T, N>` - Fixed-length tuple type
+- `ArrayElement<T>` - Extract element type from array
+- `LiteralUnion<T, U>` - Literal union with autocomplete
 
 ### Events
 
@@ -298,6 +310,7 @@ npm run example:02-result-type
 ### Testing
 
 - 100% code coverage
+- 229 tests across 7 test files
 - Unit tests for all modules
 - Integration tests
 - Vitest test runner

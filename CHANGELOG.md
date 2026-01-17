@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-01-17
+
+### Added
+- New utility types: `ValueOf`, `RequireKeys`, `OptionalKeys`, `KeysOfType`, `NonNullish`, `Mutable`, `DeepMutable`, `Tuple`, `ArrayElement`, `LiteralUnion`
+- Tests for `constants.ts` module (OXOG_PLUGIN, OXOG_KERNEL, OXOG_VERSION, ErrorCodes)
+- 37 new tests for utility types and constants
+
+### Changed
+- `constants.ts` now included in test coverage
+- Total test count increased from 192 to 229
+
+### Fixed
+- `tsup.config.ts` duplicate configuration removed
+- `PluginError` now always includes `pluginName` in context for consistent debugging
+
+### Improved
+- Package exports now include sub-module paths for semantic imports
+- All runtime code now has 100% test coverage
+
 ## [1.0.1] - 2026-01-15
 
 ### Fixed

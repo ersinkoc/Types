@@ -189,7 +189,7 @@ const myPlugin: Plugin = {
             <FeatureCard
               icon={<CheckCircle className="w-5 h-5" />}
               title="100% Coverage"
-              description="Thoroughly tested with 192 tests passing"
+              description="Thoroughly tested with 229 tests passing"
             />
           </div>
 
@@ -198,7 +198,7 @@ const myPlugin: Plugin = {
             <StatCard value="0" label="Dependencies" />
             <StatCard value="< 3KB" label="Bundle Size" />
             <StatCard value="100%" label="TypeScript" />
-            <StatCard value="192" label="Tests" />
+            <StatCard value="229" label="Tests" />
           </div>
         </div>
       </section>

@@ -31,6 +31,32 @@ if (isOk(result)) {
   console.log(result.value); // TypeScript knows it's Ok
 }`;
 
+  const utilityTypesCode = `// Object manipulation
+type ValueOf<T> = T[keyof T];
+type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+type KeysOfType<T, V> = { [K in keyof T]: T[K] extends V ? K : never }[keyof T];
+type NonNullish<T> = Exclude<T, null | undefined>;
+type Mutable<T> = { -readonly [P in keyof T]: T[P] };
+type DeepMutable<T> = T extends object ? { -readonly [P in keyof T]: DeepMutable<T[P]> } : T;
+
+// Array utilities
+type Tuple<T, N extends number> = /* Fixed-length tuple */;
+type ArrayElement<T extends readonly unknown[]> = T[number];
+type LiteralUnion<T extends U, U = string> = T | (U & { _brand?: never });`;
+
+  const utilityExamplesCode = `// Extract value types from object
+const colors = { red: '#ff0000', green: '#00ff00' } as const;
+type ColorValue = ValueOf<typeof colors>; // '#ff0000' | '#00ff00'
+
+// Make specific keys required
+interface User { id?: string; name?: string; }
+type UserWithId = RequireKeys<User, 'id'>; // { id: string; name?: string }
+
+// Fixed-length tuples
+type Point2D = Tuple<number, 2>; // [number, number]
+type RGB = Tuple<number, 3>; // [number, number, number]`;
+
   return (
     <div className="container max-w-screen-2xl mx-auto px-4 py-12">
       <div className="max-w-3xl">
@@ -62,6 +88,22 @@ if (isOk(result)) {
               Runtime type checking for Result types:
             </p>
             <CodeBlock code={typeGuardsCode} language="typescript" />
+          </section>
+
+          <section>
+            <h2 className="text-3xl font-bold mb-4">Utility Types</h2>
+            <p className="text-muted-foreground mb-4">
+              Powerful type utilities for object manipulation, arrays, and more:
+            </p>
+            <CodeBlock code={utilityTypesCode} language="typescript" />
+          </section>
+
+          <section>
+            <h2 className="text-3xl font-bold mb-4">Utility Examples</h2>
+            <p className="text-muted-foreground mb-4">
+              Practical examples of utility types in action:
+            </p>
+            <CodeBlock code={utilityExamplesCode} language="typescript" />
           </section>
         </div>
       </div>

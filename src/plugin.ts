@@ -1,6 +1,6 @@
 /**
  * @oxog/types - Plugin and Kernel interfaces
- * @version 1.0.1
+ * @version 1.0.2
  * @author Ersin Koç
  */
 

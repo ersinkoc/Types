@@ -15,7 +15,6 @@ export default defineConfig({
         'website/',
         '**/*.d.ts',
         '**/*.config.*',
-        'src/constants.ts',
         'src/events.ts',
         'src/index.ts',
         'src/plugin.ts',

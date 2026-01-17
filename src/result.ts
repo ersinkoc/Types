@@ -1,6 +1,6 @@
 /**
  * @oxog/types - Result type for functional error handling
- * @version 1.0.1
+ * @version 1.0.2
  * @author Ersin Koç
  */
 
