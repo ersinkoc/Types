@@ -1,6 +1,6 @@
 /**
  * @oxog/types - Type guard functions
- * @version 1.0.2
+ * @version 1.0.3
  * @author Ersin Koç
  */
 
@@ -12,6 +12,7 @@ import { OxogError, ValidationError, PluginError } from './errors.js';
  * Type guard for Plugin.
  *
  * Checks if a value is a valid Plugin instance.
+ * Note: This cannot verify the specific context type T at runtime.
  *
  * @example
  * ```typescript
@@ -21,13 +22,13 @@ import { OxogError, ValidationError, PluginError } from './errors.js';
  * }
  * ```
  */
-export function isPlugin<T>(value: unknown): value is Plugin<T> {
+export function isPlugin(value: unknown): value is Plugin<unknown> {
   return (
     value !== null &&
     typeof value === 'object' &&
-    typeof (value as Plugin<T>).name === 'string' &&
-    typeof (value as Plugin<T>).version === 'string' &&
-    typeof (value as Plugin<T>).install === 'function'
+    typeof (value as Plugin).name === 'string' &&
+    typeof (value as Plugin).version === 'string' &&
+    typeof (value as Plugin).install === 'function'
   );
 }
 

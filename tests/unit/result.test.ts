@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Result, Ok, Err } from '../../src/result.js';
+import { Result, Ok, Err, ResultUtils } from '../../src/result.js';
 import { isOk, isErr, isResult } from '../../src/guards.js';
 
 describe('Ok', () => {
@@ -216,13 +216,13 @@ describe('Err', () => {
     it('should throw when unwrapping', () => {
       const err = Err('error');
 
-      expect(() => err.unwrap()).toThrow('Cannot unwrap Err: error');
+      expect(() => err.unwrap()).toThrow('[OxogTypes] Cannot unwrap Err: "error"');
     });
 
     it('should throw with object error', () => {
       const err = Err({ code: 'TEST' });
 
-      expect(() => err.unwrap()).toThrow('Cannot unwrap Err: [object Object]');
+      expect(() => err.unwrap()).toThrow('[OxogTypes] Cannot unwrap Err: {"code":"TEST"}');
     });
   });
 
@@ -312,5 +312,194 @@ describe('isErr', () => {
     expect(isErr(undefined)).toBe(false);
     expect(isErr({})).toBe(false);
     expect(isErr({ ok: false })).toBe(false);
+  });
+});
+
+describe('flatMap', () => {
+  it('should chain Ok results', () => {
+    const result = Ok(10)
+      .flatMap((x) => Ok(x * 2))
+      .flatMap((x) => Ok(x + 5));
+
+    expect(isOk(result)).toBe(true);
+    expect(result.value).toBe(25);
+  });
+
+  it('should short-circuit on Err', () => {
+    const result = Ok(10)
+      .flatMap((x) => (x > 5 ? Err('too big') : Ok(x)))
+      .flatMap((x) => Ok(x * 2));
+
+    expect(isErr(result)).toBe(true);
+    expect(result.error).toBe('too big');
+  });
+
+  it('should not execute on Err', () => {
+    let called = false;
+    const result = Err('initial error').flatMap(() => {
+      called = true;
+      return Ok(42);
+    });
+
+    expect(called).toBe(false);
+    expect(isErr(result)).toBe(true);
+    expect(result.error).toBe('initial error');
+  });
+
+  it('should allow type transformation', () => {
+    const parseNumber = (s: string): Result<number, string> => {
+      const n = parseInt(s, 10);
+      return isNaN(n) ? Err('not a number') : Ok(n);
+    };
+
+    const result = Ok('42').flatMap(parseNumber);
+    expect(isOk(result)).toBe(true);
+    expect(result.value).toBe(42);
+
+    const invalid = Ok('abc').flatMap(parseNumber);
+    expect(isErr(invalid)).toBe(true);
+    expect(invalid.error).toBe('not a number');
+  });
+});
+
+describe('safeStringify edge cases', () => {
+  it('should handle circular references', () => {
+    const circular: Record<string, unknown> = { name: 'test' };
+    circular.self = circular;
+    const err = Err(circular);
+
+    expect(() => err.unwrap()).toThrow('[Circular]');
+  });
+
+  it('should handle BigInt', () => {
+    const err = Err(BigInt(123456789));
+
+    expect(() => err.unwrap()).toThrow('123456789');
+  });
+
+  it('should handle nested BigInt in objects', () => {
+    const err = Err({ id: 1, bigValue: BigInt(999) });
+
+    expect(() => err.unwrap()).toThrow('999');
+  });
+
+  it('should handle objects that throw on property access', () => {
+    const problematic = {
+      toJSON() {
+        throw new Error('Cannot serialize');
+      },
+    };
+    const err = Err(problematic);
+
+    // Should fall back to String(value) in catch block
+    expect(() => err.unwrap()).toThrow('[object Object]');
+  });
+
+  it('should handle Error objects', () => {
+    const err = Err(new Error('Something went wrong'));
+
+    expect(() => err.unwrap()).toThrow('Something went wrong');
+  });
+
+  it('should handle Symbol', () => {
+    const err = Err(Symbol('test'));
+
+    expect(() => err.unwrap()).toThrow('Symbol(test)');
+  });
+
+  it('should handle functions', () => {
+    const err = Err(() => 'test');
+
+    expect(() => err.unwrap()).toThrow('[Function]');
+  });
+});
+
+describe('ResultUtils', () => {
+  describe('tryCatch', () => {
+    it('should return Ok for successful function', () => {
+      const result = ResultUtils.tryCatch(() => JSON.parse('{"a": 1}'));
+
+      expect(isOk(result)).toBe(true);
+      expect(result.value).toEqual({ a: 1 });
+    });
+
+    it('should return Err for throwing function', () => {
+      const result = ResultUtils.tryCatch(() => JSON.parse('invalid'));
+
+      expect(isErr(result)).toBe(true);
+      expect(result.error).toBeInstanceOf(Error);
+    });
+
+    it('should wrap non-Error throws in Error', () => {
+      const result = ResultUtils.tryCatch(() => {
+        throw 'string error';
+      });
+
+      expect(isErr(result)).toBe(true);
+      expect(result.error).toBeInstanceOf(Error);
+      expect(result.error.message).toBe('string error');
+    });
+  });
+
+  describe('fromPromise', () => {
+    it('should return Ok for resolved promise', async () => {
+      const result = await ResultUtils.fromPromise(Promise.resolve(42));
+
+      expect(isOk(result)).toBe(true);
+      expect(result.value).toBe(42);
+    });
+
+    it('should return Err for rejected promise', async () => {
+      const result = await ResultUtils.fromPromise(
+        Promise.reject(new Error('failed'))
+      );
+
+      expect(isErr(result)).toBe(true);
+      expect(result.error).toBeInstanceOf(Error);
+      expect(result.error.message).toBe('failed');
+    });
+
+    it('should wrap non-Error rejections in Error', async () => {
+      const result = await ResultUtils.fromPromise(Promise.reject('string error'));
+
+      expect(isErr(result)).toBe(true);
+      expect(result.error).toBeInstanceOf(Error);
+      expect(result.error.message).toBe('string error');
+    });
+  });
+
+  describe('all', () => {
+    it('should combine all Ok results', () => {
+      const result = ResultUtils.all([Ok(1), Ok(2), Ok(3)]);
+
+      expect(isOk(result)).toBe(true);
+      expect(result.value).toEqual([1, 2, 3]);
+    });
+
+    it('should return first Err', () => {
+      const result = ResultUtils.all([Ok(1), Err('first'), Err('second')]);
+
+      expect(isErr(result)).toBe(true);
+      expect(result.error).toBe('first');
+    });
+
+    it('should return Ok for empty array', () => {
+      const result = ResultUtils.all([]);
+
+      expect(isOk(result)).toBe(true);
+      expect(result.value).toEqual([]);
+    });
+
+    it('should work with mixed types', () => {
+      const results: Result<number | string, string>[] = [
+        Ok(1),
+        Ok('two'),
+        Ok(3),
+      ];
+      const result = ResultUtils.all(results);
+
+      expect(isOk(result)).toBe(true);
+      expect(result.value).toEqual([1, 'two', 3]);
+    });
   });
 });

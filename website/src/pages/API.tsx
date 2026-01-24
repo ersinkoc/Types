@@ -8,6 +8,7 @@ interface Ok<T> {
   readonly value: T;
 
   map<U>(fn: (value: T) => U): Result<U, never>;
+  flatMap<U, F>(fn: (value: T) => Result<U, F>): Result<U, F>;
   mapErr<F>(fn: (error: never) => F): Ok<T>;
   match<U>(handlers: { ok: (value: T) => U; err: (error: never) => U }): U;
   unwrap(): T;
@@ -21,6 +22,22 @@ function Err<E>(error: E): Err<E>;
 // Usage
 const success = Ok(42);
 const failure = Err('Something went wrong');`;
+
+  const resultUtilsCode = `// Wrap a function that may throw
+const parsed = ResultUtils.tryCatch(() => JSON.parse(input));
+
+// Wrap a promise
+const data = await ResultUtils.fromPromise(fetch('/api'));
+
+// Combine multiple results
+const combined = ResultUtils.all([Ok(1), Ok(2), Ok(3)]);
+// Ok([1, 2, 3])
+
+// Chain operations with flatMap
+const result = Ok(10)
+  .flatMap(x => x > 0 ? Ok(x * 2) : Err('negative'))
+  .flatMap(x => Ok(x.toString()));
+// Ok('20')`;
 
   const typeGuardsCode = `function isOk<T>(result: Result<T, unknown>): result is Ok<T>;
 function isErr<E>(result: Result<unknown, E>): result is Err<E>;
@@ -80,6 +97,14 @@ type RGB = Tuple<number, 3>; // [number, number, number]`;
               Create Ok and Err instances:
             </p>
             <CodeBlock code={factoryFunctionsCode} language="typescript" />
+          </section>
+
+          <section>
+            <h2 className="text-3xl font-bold mb-4">ResultUtils</h2>
+            <p className="text-muted-foreground mb-4">
+              Utility functions for working with Results - wrap throwing functions, promises, and combine multiple results:
+            </p>
+            <CodeBlock code={resultUtilsCode} language="typescript" />
           </section>
 
           <section>

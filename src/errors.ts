@@ -1,6 +1,6 @@
 /**
  * @oxog/types - Standardized error classes
- * @version 1.0.2
+ * @version 1.0.3
  * @author Ersin Koç
  */
 

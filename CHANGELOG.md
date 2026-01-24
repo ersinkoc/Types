@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-01-25
+
+### Added
+- `flatMap` method to `Result` type for chaining operations that return `Result` (like Rust's `and_then`)
+- `ResultUtils` namespace with utility functions:
+  - `tryCatch<T>(fn: () => T)` - Wraps throwing functions into `Result<T, Error>`
+  - `fromPromise<T>(promise: Promise<T>)` - Wraps promises into `Promise<Result<T, Error>>`
+  - `all<T, E>(results: Result<T, E>[])` - Combines multiple Results into `Result<T[], E>`
+- 21 new tests for `flatMap`, `ResultUtils`, and edge cases
+
+### Fixed
+- `unwrap()` now safely handles edge cases that previously crashed:
+  - Circular references (now shows `[Circular]` instead of throwing)
+  - `BigInt` values (now converts to string instead of throwing)
+  - `Error` objects (now shows error message instead of `{}`)
+  - `Symbol` values (now shows `Symbol(name)` instead of `undefined`)
+  - Functions (now shows `[Function]` instead of `undefined`)
+
+### Improved
+- Documentation examples now include proper import statements
+- Total test count increased from 229 to 250
+
 ## [1.0.2] - 2026-01-17
 
 ### Added

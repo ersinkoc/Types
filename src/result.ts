@@ -1,8 +1,49 @@
 /**
  * @oxog/types - Result type for functional error handling
- * @version 1.0.2
+ * @version 1.0.3
  * @author Ersin Koç
  */
+
+/**
+ * Safely converts a value to string for error messages.
+ * Handles circular references, BigInt, Error objects, and other edge cases.
+ * @internal
+ */
+function safeStringify(value: unknown): string {
+  if (value instanceof Error) {
+    return value.message;
+  }
+
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+
+  if (typeof value === 'symbol') {
+    return value.toString();
+  }
+
+  if (typeof value === 'function') {
+    return '[Function]';
+  }
+
+  try {
+    const seen = new WeakSet();
+    return JSON.stringify(value, (_key, val) => {
+      if (typeof val === 'bigint') {
+        return val.toString();
+      }
+      if (typeof val === 'object' && val !== null) {
+        if (seen.has(val)) {
+          return '[Circular]';
+        }
+        seen.add(val);
+      }
+      return val;
+    });
+  } catch {
+    return String(value);
+  }
+}
 
 /**
  * Represents a successful result.
@@ -12,6 +53,8 @@
  *
  * @example
  * ```typescript
+ * import { Ok, isOk } from '@oxog/types';
+ *
  * const ok = Ok(42);
  * if (isOk(ok)) {
  *   console.log(ok.value); // 42
@@ -26,6 +69,9 @@ export interface Ok<T> {
   /** Transform the value if successful */
   map<U>(fn: (value: T) => U): Result<U, never>;
 
+  /** Chain operations that return Result (like Rust's and_then) */
+  flatMap<U, F>(fn: (value: T) => Result<U, F>): Result<U, F>;
+
   /** Transform the error (no-op for Ok) */
   mapErr<F>(fn: (error: never) => F): Ok<T>;
 
@@ -39,7 +85,7 @@ export interface Ok<T> {
   unwrapOr(defaultValue: T): T;
 
   /** Unwrap using a fallback function */
-  unwrapOrElse(fn: () => T): T;
+  unwrapOrElse<U>(fn: (error: never) => U): T;
 }
 
 /**
@@ -50,6 +96,8 @@ export interface Ok<T> {
  *
  * @example
  * ```typescript
+ * import { Err, isErr } from '@oxog/types';
+ *
  * const err = Err('Something went wrong');
  * if (isErr(err)) {
  *   console.log(err.error); // 'Something went wrong'
@@ -64,6 +112,9 @@ export interface Err<E> {
   /** Transform the value (no-op for Err) */
   map<U>(fn: (value: never) => U): Err<E>;
 
+  /** Chain operations that return Result (no-op for Err) */
+  flatMap<U, F>(fn: (value: never) => Result<U, F>): Err<E>;
+
   /** Transform the error if failed */
   mapErr<F>(fn: (error: E) => F): Result<never, F>;
 
@@ -77,7 +128,7 @@ export interface Err<E> {
   unwrapOr<T>(defaultValue: T): T;
 
   /** Unwrap using a fallback function */
-  unwrapOrElse<T>(fn: () => T): T;
+  unwrapOrElse<U>(fn: (error: E) => U): U;
 }
 
 /**
@@ -125,6 +176,10 @@ class OkImpl<T> implements Ok<T> {
     return Ok(fn(this.value));
   }
 
+  flatMap<U, F>(fn: (value: T) => Result<U, F>): Result<U, F> {
+    return fn(this.value);
+  }
+
   mapErr<F>(_fn: (error: never) => F): Ok<T> {
     return this;
   }
@@ -141,7 +196,7 @@ class OkImpl<T> implements Ok<T> {
     return this.value;
   }
 
-  unwrapOrElse(_fn: () => T): T {
+  unwrapOrElse<U>(_fn: (error: never) => U): T {
     return this.value;
   }
 }
@@ -159,6 +214,10 @@ class ErrImpl<E> implements Err<E> {
     return this;
   }
 
+  flatMap<U, F>(_fn: (value: never) => Result<U, F>): Err<E> {
+    return this;
+  }
+
   mapErr<F>(fn: (error: E) => F): Result<never, F> {
     return Err(fn(this.error));
   }
@@ -168,14 +227,14 @@ class ErrImpl<E> implements Err<E> {
   }
 
   unwrap(): never {
-    throw new Error(`Cannot unwrap Err: ${String(this.error)}`);
+    throw new Error(`[OxogTypes] Cannot unwrap Err: ${safeStringify(this.error)}`);
   }
 
   unwrapOr<T>(defaultValue: T): T {
     return defaultValue;
   }
 
-  unwrapOrElse<T>(fn: (error: E) => T): T {
+  unwrapOrElse<U>(fn: (error: E) => U): U {
     return fn(this.error);
   }
 }
@@ -213,3 +272,83 @@ export function Ok<T>(value: T): Ok<T> {
 export function Err<E>(error: E): Err<E> {
   return new ErrImpl(error);
 }
+
+/**
+ * Result utility functions for common operations.
+ *
+ * @example
+ * ```typescript
+ * // Wrap a function that may throw
+ * const result = ResultUtils.tryCatch(() => JSON.parse(input));
+ *
+ * // Wrap a promise
+ * const asyncResult = await ResultUtils.fromPromise(fetch('/api'));
+ *
+ * // Combine multiple results
+ * const combined = ResultUtils.all([Ok(1), Ok(2), Ok(3)]);
+ * ```
+ */
+export const ResultUtils = {
+  /**
+   * Wraps a function that may throw into a Result.
+   *
+   * @example
+   * ```typescript
+   * const result = ResultUtils.tryCatch(() => JSON.parse('{"valid": true}'));
+   * // Ok({ valid: true })
+   *
+   * const invalid = ResultUtils.tryCatch(() => JSON.parse('invalid'));
+   * // Err(SyntaxError: ...)
+   * ```
+   */
+  tryCatch<T>(fn: () => T): Result<T, Error> {
+    try {
+      return Ok(fn());
+    } catch (e) {
+      return Err(e instanceof Error ? e : new Error(String(e)));
+    }
+  },
+
+  /**
+   * Wraps a Promise into a Promise<Result>.
+   *
+   * @example
+   * ```typescript
+   * const result = await ResultUtils.fromPromise(fetch('/api/data'));
+   * if (isOk(result)) {
+   *   console.log(result.value); // Response
+   * }
+   * ```
+   */
+  async fromPromise<T>(promise: Promise<T>): Promise<Result<T, Error>> {
+    try {
+      return Ok(await promise);
+    } catch (e) {
+      return Err(e instanceof Error ? e : new Error(String(e)));
+    }
+  },
+
+  /**
+   * Combines multiple Results into a single Result containing an array.
+   * Returns the first error if any Result is an Err.
+   *
+   * @example
+   * ```typescript
+   * const results = ResultUtils.all([Ok(1), Ok(2), Ok(3)]);
+   * // Ok([1, 2, 3])
+   *
+   * const withError = ResultUtils.all([Ok(1), Err('fail'), Ok(3)]);
+   * // Err('fail')
+   * ```
+   */
+  all<T, E>(results: Result<T, E>[]): Result<T[], E> {
+    const values: T[] = [];
+    for (const result of results) {
+      if (!result.ok) {
+        return result as Err<E>;
+      }
+      values.push(result.value);
+    }
+    return Ok(values);
+  },
+};

@@ -1,4 +1,4 @@
-@oxog/types - LLM-Native Documentation v1.0.2
+@oxog/types - LLM-Native Documentation v1.0.3
 
 PACKAGE OVERVIEW
 @oxog/types is the foundational TypeScript package for the @oxog ecosystem, providing zero-dependency type definitions for micro-kernel plugin architecture, functional error handling, and common utilities. Pure TypeScript, no runtime dependencies.
@@ -33,6 +33,7 @@ Ok<T> Interface:
 - ok: true
 - value: T
 - map<U>(fn: (value: T) => U): Result<U, never>
+- flatMap<U, F>(fn: (value: T) => Result<U, F>): Result<U, F>
 - mapErr<F>(fn: (error: never) => F): Ok<T>
 - match<U>(handlers): U (pattern matching)
 - unwrap(): T (assert success)
@@ -43,6 +44,7 @@ Err<E> Interface:
 - ok: false
 - error: E
 - map<U>(fn: (value: never) => U): Err<E>
+- flatMap<U, F>(fn: (value: never) => Result<U, F>): Err<E>
 - mapErr<F>(fn: (error: E) => F): Result<never, F>
 - match<U>(handlers): U
 - unwrap(): never (throws)
@@ -52,6 +54,11 @@ Err<E> Interface:
 Factory Functions:
 - Ok<T>(value: T): Ok<T>
 - Err<E>(error: E): Err<E>
+
+ResultUtils (v1.0.3):
+- tryCatch<T>(fn: () => T): Result<T, Error> - Wrap throwing functions
+- fromPromise<T>(promise: Promise<T>): Promise<Result<T, Error>> - Wrap promises
+- all<T, E>(results: Result<T, E>[]): Result<T[], E> - Combine multiple results
 
 Helpers:
 - isOk<T>(result: Result<T, unknown>): result is Ok<T>
@@ -149,7 +156,7 @@ Array Utilities:
 CONSTANTS
 OXOG_PLUGIN: Symbol.for('@oxog/plugin')
 OXOG_KERNEL: Symbol.for('@oxog/kernel')
-OXOG_VERSION: '1.0.2'
+OXOG_VERSION: '1.0.3'
 
 USAGE PATTERNS
 
@@ -175,6 +182,21 @@ const result = divide(10, 2);
 if (isOk(result)) {
   console.log(result.value);
 }
+
+ResultUtils & flatMap (v1.0.3):
+// Wrap throwing function
+const parsed = ResultUtils.tryCatch(() => JSON.parse(input));
+
+// Wrap promise
+const data = await ResultUtils.fromPromise(fetch('/api'));
+
+// Combine multiple results
+const combined = ResultUtils.all([Ok(1), Ok(2), Ok(3)]); // Ok([1, 2, 3])
+
+// Chain with flatMap
+const chained = Ok(10)
+  .flatMap(x => x > 0 ? Ok(x * 2) : Err('negative'))
+  .flatMap(x => Ok(x.toString())); // Ok('20')
 
 Error Handling:
 try {
@@ -211,7 +233,7 @@ TECHNICAL DETAILS
 - TypeScript strict mode
 - ES2022 target
 - ESM + CJS builds
-- 100% test coverage (229 tests)
+- 100% test coverage (250 tests)
 - Bundle size: < 3KB gzipped
 - Universal (Node.js + Browser)
 - Node.js >= 18
@@ -220,7 +242,7 @@ TECHNICAL DETAILS
 EXPORT STRUCTURE
 All exports available from '@oxog/types':
 - Plugin<T>, Kernel<T>, PluginOptions, PluginLogger
-- Result<T, E>, Ok<T>, Err<E>, Ok(), Err()
+- Result<T, E>, Ok<T>, Err<E>, Ok(), Err(), ResultUtils
 - isOk, isErr, isResult
 - OxogError, ValidationError, PluginError, ErrorCodes
 - isPlugin, isKernel, isOxogError, isValidationError, isPluginError

@@ -1,11 +1,22 @@
 /**
  * @oxog/types - Common TypeScript utility types
- * @version 1.0.2
+ * @version 1.0.3
  * @author Ersin Koç
  */
 
 /** Brand symbol for branded types */
 declare const __brand: unique symbol;
+
+/**
+ * Built-in types that should not be recursed into.
+ */
+export type Builtin =
+  | Function
+  | Date
+  | Error
+  | RegExp
+  | Generator
+  | { readonly [Symbol.toStringTag]: string };
 
 /**
  * Creates a branded type for type-safe identifiers.
@@ -61,7 +72,9 @@ export type Brand<T, B extends string> = Branded<T, B>;
  * };
  * ```
  */
-export type DeepPartial<T> = T extends object
+export type DeepPartial<T> = T extends Builtin
+  ? T
+  : T extends object
   ? { [P in keyof T]?: DeepPartial<T[P]> }
   : T;
 
@@ -90,7 +103,9 @@ export type DeepPartial<T> = T extends object
  * readonlyConfig.api.url = 'https://other.com';
  * ```
  */
-export type DeepReadonly<T> = T extends object
+export type DeepReadonly<T> = T extends Builtin
+  ? T
+  : T extends object
   ? { readonly [P in keyof T]: DeepReadonly<T[P]> }
   : T;
 
@@ -118,7 +133,9 @@ export type DeepReadonly<T> = T extends object
  * };
  * ```
  */
-export type DeepRequired<T> = T extends object
+export type DeepRequired<T> = T extends Builtin
+  ? T
+  : T extends object
   ? { [P in keyof T]-?: DeepRequired<T[P]> }
   : T;
 
@@ -416,7 +433,9 @@ export type Mutable<T> = { -readonly [P in keyof T]: T[P] };
  * // { api: { url: string } }
  * ```
  */
-export type DeepMutable<T> = T extends object
+export type DeepMutable<T> = T extends Builtin
+  ? T
+  : T extends object
   ? { -readonly [P in keyof T]: DeepMutable<T[P]> }
   : T;
 

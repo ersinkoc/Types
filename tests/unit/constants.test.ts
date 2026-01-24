@@ -60,7 +60,7 @@ describe('OXOG_VERSION', () => {
   });
 
   it('should be current version', () => {
-    expect(OXOG_VERSION).toBe('1.0.2');
+    expect(OXOG_VERSION).toBe('1.0.3');
   });
 });
 
